@@ -38,10 +38,14 @@ const nextConfig = {
       '@radix-ui/react-toast'
     ],
     // Explicitly include critical Next.js files that must be in standalone output
-    // This ensures node-polyfill-crypto and other server files are available
+    // This ensures all Next.js server, build, and shared files are available
     outputFileTracingIncludes: {
       '*': [
-        'node_modules/next/dist/server/node-polyfill-crypto*',
+        'node_modules/next/dist/server/**',
+        'node_modules/next/dist/build/**',
+        'node_modules/next/dist/compiled/**',
+        'node_modules/next/dist/lib/**',
+        'node_modules/next/dist/shared/**',
       ],
     },
     // Exclude unnecessary files from function bundle to reduce size
