@@ -309,9 +309,10 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   // Enable compression
   compress: true,
-  // CRITICAL: Enable standalone mode to reduce bundle size below 250MB
-  // This creates a minimal server bundle with only required dependencies
-  output: 'standalone',
+  // CRITICAL: Disable standalone mode - Netlify plugin handles deployment better without it
+  // Standalone mode was copying too many files and exceeding 250MB limit
+  // The @netlify/plugin-nextjs handles Next.js deployment without standalone mode
+  // output: 'standalone', // DISABLED - let Netlify plugin handle it
   // Skip type checking during build for speed
   typescript: {
     ignoreBuildErrors: true,
