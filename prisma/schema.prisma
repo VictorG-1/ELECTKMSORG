@@ -1,5 +1,8 @@
 generator client {
   provider = "prisma-client-js"
+  // Vercel runs on Linux x64 with glibc
+  // native = Linux x64 glibc (primary for Vercel)
+  // rhel-openssl-3.0.x = RHEL with OpenSSL 3.0 (fallback)
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 

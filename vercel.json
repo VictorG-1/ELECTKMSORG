@@ -1,11 +1,8 @@
 {
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "npm install --legacy-peer-deps && npx prisma generate",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "env": {
-    "SKIP_ENV_VALIDATION": "true"
-  }
+  "regions": ["iad1"]
 }
 

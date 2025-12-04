@@ -41,7 +41,7 @@ let prismaInstance: PrismaClient | undefined
 const isBuildTime = typeof process !== 'undefined' && (
   process.env.NEXT_PHASE === 'phase-production-build' ||
   process.env.NEXT_PHASE === 'phase-export' ||
-  (process.env.NETLIFY === 'true' && !process.env.DATABASE_URL) ||
+  (process.env.VERCEL === '1' && !process.env.DATABASE_URL && process.env.NEXT_PHASE) ||
   (process.env.CI === 'true' && !process.env.DATABASE_URL && process.env.NODE_ENV === 'production')
 )
 

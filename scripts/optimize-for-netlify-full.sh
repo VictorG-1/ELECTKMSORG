@@ -172,7 +172,7 @@ if [ -d ".next" ]; then
     # - .next/prerender-manifest.json (required by plugin)
     # - .next/server/** (entire directory - required by plugin)
     # - .next/static/** (entire directory - required by plugin)
-    # - .next/standalone/** (may be needed, preserve it)
+    # - .next/standalone/** (legacy - not used on Vercel)
     # - Any JSON files (may be manifests)
     # - Any other files or directories
     

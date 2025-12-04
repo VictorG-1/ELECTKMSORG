@@ -1,5 +1,6 @@
 node_modules
 .next
+.next/standalone
 uploads
 
 # Local Netlify folder (legacy)
