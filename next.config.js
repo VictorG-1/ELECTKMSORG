@@ -37,18 +37,10 @@ const nextConfig = {
       '@radix-ui/react-tabs',
       '@radix-ui/react-toast'
     ],
-    // Explicitly include critical Next.js files that must be in standalone output
-    // This ensures all Next.js server, build, and shared files are available
-    outputFileTracingIncludes: {
-      '*': [
-        'node_modules/next/dist/server/**',
-        'node_modules/next/dist/build/**',
-        'node_modules/next/dist/compiled/**',
-        'node_modules/next/dist/lib/**',
-        'node_modules/next/dist/shared/**',
-        'node_modules/@swc/helpers/**',
-      ],
-    },
+    // NOTE: We don't use outputFileTracingIncludes for externalized packages
+    // Next.js and @swc/helpers are externalized, so they're loaded from node_modules at runtime
+    // The exclusion exceptions (!node_modules/next/**) preserve them without bundling
+    // Next.js standalone mode automatically traces and includes only what's needed
     // Exclude unnecessary files from function bundle to reduce size
     // NOTE: Do NOT exclude @swc/helpers - Next.js needs it at runtime
     outputFileTracingExcludes: {
