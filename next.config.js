@@ -46,6 +46,7 @@ const nextConfig = {
         'node_modules/next/dist/compiled/**',
         'node_modules/next/dist/lib/**',
         'node_modules/next/dist/shared/**',
+        'node_modules/@swc/helpers/**',
       ],
     },
     // Exclude unnecessary files from function bundle to reduce size
