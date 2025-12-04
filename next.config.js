@@ -37,6 +37,13 @@ const nextConfig = {
       '@radix-ui/react-tabs',
       '@radix-ui/react-toast'
     ],
+    // Explicitly include critical Next.js files that must be in standalone output
+    // This ensures node-polyfill-crypto and other server files are available
+    outputFileTracingIncludes: {
+      '*': [
+        'node_modules/next/dist/server/node-polyfill-crypto*',
+      ],
+    },
     // Exclude unnecessary files from function bundle to reduce size
     // NOTE: Do NOT exclude @swc/helpers - Next.js needs it at runtime
     outputFileTracingExcludes: {
@@ -68,6 +75,9 @@ const nextConfig = {
         '!node_modules/@next/**',
         '!node_modules/@swc/helpers/**',
         '!node_modules/styled-jsx/**',
+        // CRITICAL: Explicitly preserve node-polyfill-crypto - Next.js requires it at runtime
+        '!node_modules/next/dist/server/node-polyfill-crypto*',
+        '!node_modules/next/dist/compiled/node-polyfill-crypto*',
         // Exclude test files and documentation
         '**/*.test.*',
         '**/*.spec.*',
