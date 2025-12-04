@@ -79,6 +79,8 @@ const nextConfig = {
         // Exclude TypeScript source files (keep only .d.ts)
         '**/*.ts',
         '!**/*.d.ts',
+        // CRITICAL: Do NOT exclude styled-jsx package.json - Next.js requires it
+        '!node_modules/styled-jsx/package.json',
         // Exclude unnecessary Radix UI files (better tree-shaking)
         'node_modules/@radix-ui/**/*.stories.*',
         'node_modules/@radix-ui/**/README*',
@@ -125,7 +127,8 @@ const nextConfig = {
       'twilio',
       'next-auth',
       '@hookform/resolvers',
-      'react-hook-form'
+      'react-hook-form',
+      'styled-jsx'
     ],
   },
   // Configure middleware to avoid Edge Function issues
