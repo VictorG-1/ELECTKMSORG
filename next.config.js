@@ -48,15 +48,23 @@ const nextConfig = {
         'node_modules/terser/**/*',
         'node_modules/webpack/**/*',
         'node_modules/.cache/**/*',
-        // Exclude Prisma engines for other platforms
+        // Exclude Prisma engines for other platforms (keep Linux x64 and RHEL for Vercel)
         'node_modules/.prisma/client/libquery_engine-darwin*',
         'node_modules/.prisma/client/libquery_engine-windows*',
         'node_modules/.prisma/client/libquery_engine-debian*',
         'node_modules/.prisma/client/libquery_engine-linux-musl*',
+        // CRITICAL: Keep Linux x64 glibc and RHEL binaries (required for Vercel)
+        // native binary = libquery_engine-linux-x64-gnu.so.node
+        '!node_modules/.prisma/client/libquery_engine-linux-x64-gnu*',
+        '!node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x*',
         'node_modules/@prisma/engines/**/query-engine-darwin*',
         'node_modules/@prisma/engines/**/query-engine-windows*',
         'node_modules/@prisma/engines/**/query-engine-debian*',
         'node_modules/@prisma/engines/**/query-engine-linux-musl*',
+        // CRITICAL: Keep Linux x64 glibc and RHEL binaries (required for Vercel)
+        '!node_modules/@prisma/engines/**/query-engine-linux-x64-gnu*',
+        '!node_modules/@prisma/engines/**/query-engine-rhel-openssl-3.0.x*',
+        // Exclude migration and introspection engines (not needed at runtime)
         'node_modules/@prisma/engines/**/migration-engine*',
         'node_modules/@prisma/engines/**/introspection-engine*',
         'node_modules/@prisma/engines/**/prisma-fmt*',
@@ -77,6 +85,8 @@ const nextConfig = {
         // Exclude TypeScript source files (keep only .d.ts)
         '**/*.ts',
         '!**/*.d.ts',
+        // CRITICAL: Ensure styled-jsx is included (Next.js internal dependency)
+        '!node_modules/styled-jsx/**',
         // Exclude unnecessary Radix UI files
         'node_modules/@radix-ui/**/*.stories.*',
         'node_modules/@radix-ui/**/README*',
@@ -98,29 +108,15 @@ const nextConfig = {
         'node_modules/@aws-sdk/**/CHANGELOG*',
       ],
     },
-    // External packages for server components (Vercel handles these automatically)
-    serverComponentsExternalPackages: [
-      'prisma',
-      '@prisma/client',
-      'pg',
-      'bcryptjs',
-      'jsonwebtoken',
-      'nodemailer',
-      'csv-parser',
-      'uuid',
-      'zod',
-      '@aws-sdk/client-s3',
-      '@aws-sdk/s3-request-presigner',
-      '@aws-sdk/client-sso',
-      '@aws-sdk/client-sso-oidc',
-      '@aws-sdk/credential-providers',
-      'cloudinary',
-      'twilio',
-      'next-auth',
-      '@hookform/resolvers',
-      'react-hook-form',
-      'styled-jsx'
-    ],
+    // Explicitly include styled-jsx (Next.js internal dependency)
+    outputFileTracingIncludes: {
+      '/**': [
+        'node_modules/styled-jsx/**/*',
+      ],
+    },
+    // No external packages - bundle everything for Vercel
+    // This ensures all dependencies are included and avoids module resolution issues
+    serverComponentsExternalPackages: [],
   },
   transpilePackages: [],
   // Enable SWC minification
