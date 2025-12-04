@@ -94,7 +94,10 @@
   included_files = [
     "node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node",
     "node_modules/@prisma/engines/**/libquery_engine-rhel-openssl-3.0.x.so.node",
-    "node_modules/styled-jsx/**"
+    "node_modules/styled-jsx/**",
+    "node_modules/next/**",
+    "node_modules/@next/**",
+    "node_modules/@swc/helpers/**"
   ]
   # DO NOT include .env files - use Netlify environment variables instead
   # Edge functions need access to node_modules structure - don't modify it

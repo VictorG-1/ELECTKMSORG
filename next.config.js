@@ -62,6 +62,12 @@ const nextConfig = {
         'node_modules/@prisma/engines/**/migration-engine*',
         'node_modules/@prisma/engines/**/introspection-engine*',
         'node_modules/@prisma/engines/**/prisma-fmt*',
+        // CRITICAL: Preserve Next.js and critical runtime files FIRST
+        // These must be preserved before any broad exclusions
+        '!node_modules/next/**',
+        '!node_modules/@next/**',
+        '!node_modules/@swc/helpers/**',
+        '!node_modules/styled-jsx/**',
         // Exclude test files and documentation
         '**/*.test.*',
         '**/*.spec.*',
@@ -77,10 +83,9 @@ const nextConfig = {
         '**/docs/**',
         '**/documentation/**',
         // Exclude TypeScript source files (keep only .d.ts)
+        // Next.js files are already preserved above
         '**/*.ts',
         '!**/*.d.ts',
-        // CRITICAL: Do NOT exclude styled-jsx package.json - Next.js requires it
-        '!node_modules/styled-jsx/package.json',
         // Exclude unnecessary Radix UI files (better tree-shaking)
         'node_modules/@radix-ui/**/*.stories.*',
         'node_modules/@radix-ui/**/README*',
