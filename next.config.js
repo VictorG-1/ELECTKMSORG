@@ -15,7 +15,6 @@ const nextConfig = {
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Skip font optimization during build if network fails (non-blocking)
-  // This prevents build failures due to Google Fonts network timeouts
   optimizeFonts: process.env.SKIP_FONT_OPTIMIZATION !== 'true',
   
   // Performance optimizations
@@ -37,12 +36,7 @@ const nextConfig = {
       '@radix-ui/react-tabs',
       '@radix-ui/react-toast'
     ],
-    // NOTE: We don't use outputFileTracingIncludes for externalized packages
-    // Next.js and @swc/helpers are externalized, so they're loaded from node_modules at runtime
-    // The exclusion exceptions (!node_modules/next/**) preserve them without bundling
-    // Next.js standalone mode automatically traces and includes only what's needed
-    // Exclude unnecessary files from function bundle to reduce size
-    // NOTE: Do NOT exclude @swc/helpers - Next.js needs it at runtime
+    // Exclude unnecessary files from build output
     outputFileTracingExcludes: {
       '*': [
         'node_modules/@swc/core-linux-x64-gnu/**/*',
@@ -54,7 +48,7 @@ const nextConfig = {
         'node_modules/terser/**/*',
         'node_modules/webpack/**/*',
         'node_modules/.cache/**/*',
-        // Exclude Prisma engines (except RHEL which is included via netlify.toml)
+        // Exclude Prisma engines for other platforms
         'node_modules/.prisma/client/libquery_engine-darwin*',
         'node_modules/.prisma/client/libquery_engine-windows*',
         'node_modules/.prisma/client/libquery_engine-debian*',
@@ -66,15 +60,6 @@ const nextConfig = {
         'node_modules/@prisma/engines/**/migration-engine*',
         'node_modules/@prisma/engines/**/introspection-engine*',
         'node_modules/@prisma/engines/**/prisma-fmt*',
-        // CRITICAL: Preserve Next.js and critical runtime files FIRST
-        // These must be preserved before any broad exclusions
-        '!node_modules/next/**',
-        '!node_modules/@next/**',
-        '!node_modules/@swc/helpers/**',
-        '!node_modules/styled-jsx/**',
-        // CRITICAL: Explicitly preserve node-polyfill-crypto - Next.js requires it at runtime
-        '!node_modules/next/dist/server/node-polyfill-crypto*',
-        '!node_modules/next/dist/compiled/node-polyfill-crypto*',
         // Exclude test files and documentation
         '**/*.test.*',
         '**/*.spec.*',
@@ -90,22 +75,9 @@ const nextConfig = {
         '**/docs/**',
         '**/documentation/**',
         // Exclude TypeScript source files (keep only .d.ts)
-        // Next.js files are already preserved above
         '**/*.ts',
         '!**/*.d.ts',
-        // Exclude large unnecessary files from standalone output
-        'node_modules/**/*.md',
-        'node_modules/**/CHANGELOG*',
-        'node_modules/**/LICENSE*',
-        'node_modules/**/README*',
-        'node_modules/**/examples/**',
-        'node_modules/**/example/**',
-        'node_modules/**/docs/**',
-        'node_modules/**/documentation/**',
-        'node_modules/**/.github/**',
-        'node_modules/**/.vscode/**',
-        'node_modules/**/.idea/**',
-        // Exclude unnecessary Radix UI files (better tree-shaking)
+        // Exclude unnecessary Radix UI files
         'node_modules/@radix-ui/**/*.stories.*',
         'node_modules/@radix-ui/**/README*',
         'node_modules/@radix-ui/**/*.test.*',
@@ -114,38 +86,19 @@ const nextConfig = {
         'node_modules/recharts/**/*.ts',
         'node_modules/recharts/**/examples/**',
         'node_modules/recharts/**/*.test.*',
-        // Exclude lucide-react source files (better tree-shaking)
+        // Exclude lucide-react source files
         'node_modules/lucide-react/**/*.ts',
         'node_modules/lucide-react/**/*.tsx',
         '!node_modules/lucide-react/**/*.d.ts',
-        // Exclude environment files (should use Netlify env vars)
+        // Exclude environment files (use Vercel environment variables)
         '.env*',
-        // Exclude all AWS SDK packages except what's needed (already externalized)
+        // Exclude AWS SDK documentation
         'node_modules/@aws-sdk/**/*.md',
         'node_modules/@aws-sdk/**/README*',
         'node_modules/@aws-sdk/**/CHANGELOG*',
-        // Exclude more unnecessary files
-        'node_modules/**/*.min.js.map',
-        'node_modules/**/*.bundle.js.map',
-        'node_modules/**/.github/**',
-        'node_modules/**/.vscode/**',
-        'node_modules/**/.idea/**',
-        // Exclude large package files that aren't needed at runtime
-        'node_modules/**/package-lock.json',
-        'node_modules/**/yarn.lock',
-        'node_modules/**/pnpm-lock.yaml',
-        'node_modules/**/tsconfig.json',
-        'node_modules/**/tsconfig.*.json',
-        // Exclude test and development files
-        'node_modules/**/jest.config.*',
-        'node_modules/**/vitest.config.*',
-        'node_modules/**/.eslintrc*',
-        'node_modules/**/.prettierrc*',
-        'node_modules/**/babel.config.*',
-        'node_modules/**/rollup.config.*',
-        'node_modules/**/webpack.config.*',
       ],
     },
+    // External packages for server components (Vercel handles these automatically)
     serverComponentsExternalPackages: [
       'prisma',
       '@prisma/client',
@@ -169,10 +122,8 @@ const nextConfig = {
       'styled-jsx'
     ],
   },
-  // Configure middleware to avoid Edge Function issues
-  // Exclude jsonwebtoken from Edge Function bundling
   transpilePackages: [],
-  // Enable SWC minification (aggressive minification)
+  // Enable SWC minification
   swcMinify: true,
   // Additional minification settings
   compiler: {
@@ -182,58 +133,8 @@ const nextConfig = {
   },
   // Optimize bundle
   webpack: (config, { dev, isServer }) => {
-    // Externalize large dependencies for server-side (Netlify functions)
-    if (!dev && isServer) {
-      config.externals = config.externals || []
-      // Externalize large dependencies to reduce Netlify function bundle size
-      // These will be installed at runtime by Netlify, not bundled
-      // NOTE: Prisma is externalized via netlify.toml [functions] configuration
-      const largeDependencies = [
-        'pg',
-        'bcryptjs',
-        'jsonwebtoken',
-        'nodemailer',
-        '@aws-sdk/client-s3',
-        '@aws-sdk/s3-request-presigner',
-        '@aws-sdk/client-sso',
-        '@aws-sdk/client-sso-oidc',
-        '@aws-sdk/credential-providers',
-        'cloudinary',
-        'twilio',
-        'csv-parser',
-        'uuid',
-        'zod',
-        'next-auth',
-        '@hookform/resolvers',
-        'react-hook-form'
-      ]
-      // Add as external dependencies
-      config.externals.push(...largeDependencies)
-      
-      // Also externalize by pattern for better coverage
-      config.externals.push({
-        '@aws-sdk': 'commonjs @aws-sdk',
-        '@prisma': 'commonjs @prisma',
-        'prisma': 'commonjs prisma',
-        // Externalize all Radix UI packages (client-only, not used in API routes)
-        '@radix-ui': 'commonjs @radix-ui',
-        // Externalize other client-only packages
-        'lucide-react': 'commonjs lucide-react',
-        'recharts': 'commonjs recharts',
-      })
-      
-      // Enable server-side tree-shaking optimizations
-      config.optimization = {
-        ...config.optimization,
-        usedExports: true,
-        sideEffects: false,
-        minimize: true, // Enable minification for server bundles
-        moduleIds: 'deterministic', // Better tree-shaking
-      }
-    }
-    
     if (!dev && !isServer) {
-      // Enable tree shaking
+      // Enable tree shaking for client
       config.optimization.usedExports = true
       config.optimization.sideEffects = false
       
@@ -309,10 +210,6 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   // Enable compression
   compress: true,
-  // CRITICAL: Disable standalone mode - Netlify plugin handles deployment better without it
-  // Standalone mode was copying too many files and exceeding 250MB limit
-  // The @netlify/plugin-nextjs handles Next.js deployment without standalone mode
-  // output: 'standalone', // DISABLED - let Netlify plugin handle it
   // Skip type checking during build for speed
   typescript: {
     ignoreBuildErrors: true,
@@ -325,7 +222,6 @@ const nextConfig = {
   generateBuildId: async () => {
     return 'build-' + Date.now()
   },
-  // Standalone mode enabled for Netlify to reduce bundle size below 250MB
 }
 
 module.exports = nextConfig

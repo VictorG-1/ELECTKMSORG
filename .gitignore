@@ -2,8 +2,11 @@ node_modules
 .next
 uploads
 
-# Local Netlify folder
+# Local Netlify folder (legacy)
 .netlify
+
+# Vercel
+.vercel
 
 # Environment files
 .env

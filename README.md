@@ -208,7 +208,7 @@ The system uses a comprehensive database schema with the following main entities
    ```
 
 ### Recommended Hosting Platforms
-- Netlify (current)
+- Vercel (current - recommended for Next.js)
 - AWS Amplify
 - DigitalOcean App Platform
 - Railway
