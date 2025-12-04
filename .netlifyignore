@@ -1,0 +1,27 @@
+# Environment files - should NOT be included in functions
+.env
+.env.local
+.env.production
+.env.production.local
+.env.development
+.env.development.local
+
+# Development files
+*.log
+logs/
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+!README.md
+
+# Scripts (not needed in production)
+scripts/
+*.bat
+*.sh
+
+# Database files (local development)
+*.db
+*.db-journal
+prisma/dev.db

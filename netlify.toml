@@ -1,0 +1,125 @@
+# Netlify Configuration for Next.js 14
+[build]
+  # Run Next.js build first, then optimization script
+  # This ensures @netlify/plugin-nextjs can find .next directory
+  command = "npm ci --legacy-peer-deps && npx prisma generate && npm run build && chmod +x scripts/optimize-for-netlify-full.sh && bash scripts/optimize-for-netlify-full.sh"
+  publish = ".next"
+  # With standalone mode, Netlify plugin will handle the deployment structure
+  # Build process:
+  # 1. Install dependencies (npm ci)
+  # 2. Generate Prisma client
+  # 3. Build Next.js app (creates .next directory)
+  # 4. Run optimization script (cleans up unnecessary files, removes dev deps)
+  # CRITICAL: Standalone mode enabled to reduce bundle size below 250MB
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS = "--legacy-peer-deps"
+  # Reduce bundle size by optimizing dependencies
+  NODE_OPTIONS = "--max-old-space-size=4096"
+  # Skip type checking and linting during build for faster deployment
+  SKIP_ENV_VALIDATION = "true"
+  # Fix SWC build issues
+  NETLIFY_USE_PNPM = "false"
+  NETLIFY_USE_YARN = "false"
+  NEXT_TELEMETRY_DISABLED = "1"
+
+# Optimize function size - use esbuild bundler to tree-shake and minimize function code
+# esbuild will bundle and optimize the function, excluding externalized dependencies
+# Aggressive minification and tree-shaking enabled
+[functions]
+  node_bundler = "esbuild"
+  # esbuild automatically performs:
+  # - Tree-shaking (removes unused code)
+  # - Minification (compresses code)
+  # - Dead code elimination
+  # All externalized modules are excluded from bundle
+  # Externalize heavy dependencies - these will NOT be bundled, loaded from node_modules at runtime
+  # This significantly reduces bundle size by excluding large packages
+  external_node_modules = [
+    "@prisma/client",
+    "prisma",
+    "pg",
+    "bcryptjs",
+    "jsonwebtoken",
+    "nodemailer",
+    "@aws-sdk/client-s3",
+    "@aws-sdk/s3-request-presigner",
+    "@aws-sdk/client-sso",
+    "@aws-sdk/client-sso-oidc",
+    "@aws-sdk/credential-providers",
+    "@aws-sdk/middleware-stack",
+    "@aws-sdk/shared-ini-file-loader",
+    "@aws-sdk/util-credentials",
+    "cloudinary",
+    "twilio",
+    "csv-parser",
+    "uuid",
+    "zod",
+    "next",
+    "react",
+    "react-dom",
+    "next-auth",
+    "@hookform/resolvers",
+    "react-hook-form",
+    "recharts",
+    "lucide-react",
+    "tailwind-merge",
+    "tailwindcss-animate",
+    "class-variance-authority",
+    "clsx",
+    "react-hot-toast",
+    "@radix-ui/react-alert-dialog",
+    "@radix-ui/react-avatar",
+    "@radix-ui/react-checkbox",
+    "@radix-ui/react-dialog",
+    "@radix-ui/react-dropdown-menu",
+    "@radix-ui/react-icons",
+    "@radix-ui/react-label",
+    "@radix-ui/react-progress",
+    "@radix-ui/react-radio-group",
+    "@radix-ui/react-select",
+    "@radix-ui/react-separator",
+    "@radix-ui/react-slot",
+    "@radix-ui/react-tabs",
+    "@radix-ui/react-toast"
+  ]
+  # Note: Radix UI packages are externalized (client-only, not used in server functions)
+  # Include ONLY the Prisma query engine binary - required for runtime database queries
+  # DO NOT include .env files - use Netlify environment variables instead
+  included_files = [
+    "node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node",
+    "node_modules/@prisma/engines/**/libquery_engine-rhel-openssl-3.0.x.so.node"
+  ]
+  # DO NOT include .env files - use Netlify environment variables instead
+  # Edge functions need access to node_modules structure - don't modify it
+  # Note: File exclusions are handled in next.config.js via outputFileTracingExcludes
+  # Netlify doesn't support excluded_patterns in the [functions] section
+
+# Required environment variables (set these in Netlify dashboard under Site settings → Environment variables)
+# See NETLIFY_ENV_VARIABLES.md for complete checklist
+# 
+# CRITICAL (Required):
+# DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
+# JWT_SECRET=your-secret-jwt-key-here (min 32 chars)
+# CSRF_SECRET=your-csrf-secret-key-here (min 32 chars)
+# NEXTAUTH_SECRET=your-nextauth-secret-key-here (min 32 chars)
+# NEXTAUTH_URL=https://your-site-name.netlify.app
+# NODE_ENV=production
+#
+# IMPORTANT (For OTP):
+# TWILIO_ACCOUNT_SID=your-twilio-account-sid
+# TWILIO_AUTH_TOKEN=your-twilio-auth-token
+# TWILIO_PHONE_NUMBER=+1234567890
+# GMAIL_USER=your-email@gmail.com
+# GMAIL_APP_PASSWORD=your-gmail-app-password
+#
+# OPTIONAL (For file uploads):
+# STORJ_ACCESS_KEY_ID=your-storj-access-key
+# STORJ_SECRET_ACCESS_KEY=your-storj-secret-key
+# STORJ_ENDPOINT=https://gateway.storjshare.io
+# STORJ_REGION=global
+# STORJ_BUCKET_NAME=kmselection
