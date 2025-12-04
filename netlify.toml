@@ -89,14 +89,13 @@
     "@radix-ui/react-toast"
   ]
   # Note: Radix UI packages are externalized (client-only, not used in server functions)
-  # Include ONLY essential files that must be in the bundle
-  # CRITICAL: Do NOT include Next.js packages here - they are externalized and loaded from node_modules at runtime
-  # The standalone output already includes Next.js files, so we don't need to bundle them
+  # CRITICAL: Do NOT include Prisma binary or Next.js packages here - they are externalized
+  # Externalized packages are loaded from node_modules at runtime, not bundled
+  # This keeps the function bundle under 250MB
   included_files = [
-    "node_modules/.prisma/client/libquery_engine-rhel-openssl-3.0.x.so.node",
-    "node_modules/@prisma/engines/**/libquery_engine-rhel-openssl-3.0.x.so.node"
-    # styled-jsx is externalized, so it's loaded from node_modules at runtime (not bundled)
+    # Prisma binary is externalized (in external_node_modules), so it's available from node_modules at runtime
     # Next.js packages are externalized, so they're loaded from node_modules at runtime (not bundled)
+    # Only include files that MUST be in the bundle and cannot be externalized
   ]
   # DO NOT include .env files - use Netlify environment variables instead
   # Edge functions need access to node_modules structure - don't modify it
