@@ -93,6 +93,18 @@ const nextConfig = {
         // Next.js files are already preserved above
         '**/*.ts',
         '!**/*.d.ts',
+        // Exclude large unnecessary files from standalone output
+        'node_modules/**/*.md',
+        'node_modules/**/CHANGELOG*',
+        'node_modules/**/LICENSE*',
+        'node_modules/**/README*',
+        'node_modules/**/examples/**',
+        'node_modules/**/example/**',
+        'node_modules/**/docs/**',
+        'node_modules/**/documentation/**',
+        'node_modules/**/.github/**',
+        'node_modules/**/.vscode/**',
+        'node_modules/**/.idea/**',
         // Exclude unnecessary Radix UI files (better tree-shaking)
         'node_modules/@radix-ui/**/*.stories.*',
         'node_modules/@radix-ui/**/README*',
@@ -118,6 +130,20 @@ const nextConfig = {
         'node_modules/**/.github/**',
         'node_modules/**/.vscode/**',
         'node_modules/**/.idea/**',
+        // Exclude large package files that aren't needed at runtime
+        'node_modules/**/package-lock.json',
+        'node_modules/**/yarn.lock',
+        'node_modules/**/pnpm-lock.yaml',
+        'node_modules/**/tsconfig.json',
+        'node_modules/**/tsconfig.*.json',
+        // Exclude test and development files
+        'node_modules/**/jest.config.*',
+        'node_modules/**/vitest.config.*',
+        'node_modules/**/.eslintrc*',
+        'node_modules/**/.prettierrc*',
+        'node_modules/**/babel.config.*',
+        'node_modules/**/rollup.config.*',
+        'node_modules/**/webpack.config.*',
       ],
     },
     serverComponentsExternalPackages: [

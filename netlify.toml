@@ -64,6 +64,7 @@
     "react-dom",
     "next-auth",
     "styled-jsx",
+    "@swc/helpers",
     "@hookform/resolvers",
     "react-hook-form",
     "recharts",
